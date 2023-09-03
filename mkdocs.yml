@@ -1,4 +1,8 @@
-site_name: GMJ BLOG
+site_name: GMJ Blog
 theme:
   name: material
+nav:
+  - Home index.md
+  - Android 
+    - android/upnp-cast.md
 
