@@ -4,5 +4,5 @@ theme:
 nav:
   - Home index.md
   - Android 
-    - android/upnp-cast.md
+    - android/cling-in-java.md
 
