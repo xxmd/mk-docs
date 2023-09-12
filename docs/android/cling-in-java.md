@@ -1,22 +1,32 @@
 # Cling in java
 
-## Three important concepts in cling
-Before you start using the Cling framework, you must understand three concepts
-in Cling. One is `Device`, and the other is `Service`, the last is `Action`
+## 1. Three important concepts in cling
+Before you start using the Cling framework, you must understand three concepts.
+
+
+- `Device`: an abstract concept, specific examples such as tv, dvd, and router in our life.
+- `Service`: just like class in Orient-Object language.
+- `Action`: equal to function in common program language.
 
 
 Take our smartphone device as an example. It has multimedia, communication, and storage services.
-Under the multimedia service, you can execute actions such as play, pause, and set volume.
+Under the multimedia service, you can execute actions such as set volume or play control.
+The follow is a `Device-Service-Action` three-layer construct in Cling.
 
+![image](../assets/device-service-action-construct.drawio.png)
 
-![image](../../assets/device-service-action.drawio.png)
+smartphone example
+![image](../assets/device-service-action.drawio.png)
 
-## Implement smartphone example
-Through the above image, we can hava a preliminary image of the `Device-Service-Action`
+## 2. Implement smartphone example
+Through the above image, we can hava a preliminary image of the **Device-Service-Action**
 three-layer architecture. Next, we will implement **Smartphone Example** by java code.
 
-1. Step one, create a maven project and import related dependencies (Note: Please use `apache-maven-3.6.3`,
+
+- Create a maven project and import related dependencies (Note: Please use `apache-maven-3.6.3`,
 the higher versions don't allow use HTTP repository url directly)
+
+
 ```xml
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -90,14 +100,15 @@ the higher versions don't allow use HTTP repository url directly)
   <repositories>
     <repository>
       <id>nexus-4thline</id>
-      <!--Note: Please use `apache-maven-3.6.3`, the higher versions don't allow use HTTP repository url-->
+      <!--Note: Please use `apache-maven-3.6.3`, the higher versions don't allow use HTTP repository url directly-->
       <url>http://4thline.org/m2/</url>
     </repository>
   </repositories>
 </project>
 
 ```
-2. Step two, creating service and device (For simplicity, we only implement the multimedia service)
+
+- Creating a service and device (For simplicity, we only implement the multimedia service).
 
 ```java
 package org.example;
@@ -151,8 +162,10 @@ public class SmartphoneDevice {
         DeviceIdentity deviceIdentity = new DeviceIdentity(UDN.uniqueSystemIdentifier("SmartphoneDevice"));
         DeviceType deviceType = new DeviceType("org.example", "SmartphoneDevice");
         DeviceDetails deviceDetails = new DeviceDetails("SmartphoneDevice");
+        
         LocalService volumeControlService = new AnnotationLocalServiceBinder().read(MultiMediaService.class);
         volumeControlService.setManager(new DefaultServiceManager(volumeControlService, MultiMediaService.class));
+        
         LocalDevice localDevice = null;
         try {
             localDevice = new LocalDevice(deviceIdentity, deviceType, deviceDetails, volumeControlService);
@@ -165,12 +178,13 @@ public class SmartphoneDevice {
 
 ```
 
-## Executing action in custom device
+## 3. Executing action in custom device
 We have now created a **smartphone device** with **multimedia service**. Next, we
 will demonstrate how to execute the **SetVolume** action in this service.
+The invocation process is follow :
 
 
-![image](../../assets/process-action-invocation.png)
+![image](../assets/process-action-invocation.png)
 
 ```java
 package org.example;
@@ -205,6 +219,7 @@ public class AppTest
         actionInvocation.setInput("ExpiredVolumeValue", "88");
         new ActionCallback.Default(actionInvocation, upnpService.getControlPoint()).run();
     }
+    
     public void invocationActionAsync(LocalService service) {
         UpnpServiceImpl upnpService = new UpnpServiceImpl();
         Action action = service.getAction(MultiMediaService.ACTION_SET_VOLUME);
@@ -221,6 +236,7 @@ public class AppTest
                 System.out.println(defaultMsg);
             }
         });
+        
         // Avoiding function complete immediately
         try {
             Thread.sleep(1000 * 60);
@@ -232,7 +248,7 @@ public class AppTest
 
 ```
 
-## Executing action in network device
+## 4. Executing action in network device
 In the above example, we directly obtained the smartphone device instance through
 the `SmartphoneDevice.getInstance`. However, in the actual development process.
 we rarely customize devices, we only need to find special device in LAN (Local area network)
@@ -240,6 +256,8 @@ we rarely customize devices, we only need to find special device in LAN (Local a
 
 
 In the next, we will create two thread to simulate search device in LAN.
+
+
 1. The `ServeThread` provide smartphone device.
 2. The `ClientThread` find the device by network, then invocation action in this device.
 
@@ -344,6 +362,7 @@ public class ClientThread implements Runnable, RegistryListener {
     public void afterShutdown() {
 
     }
+    
     public void invocationActionSync(Service service) {
         UpnpServiceImpl upnpService = new UpnpServiceImpl();
         Action action = service.getAction(MultiMediaService.ACTION_SET_VOLUME);
@@ -351,11 +370,14 @@ public class ClientThread implements Runnable, RegistryListener {
         actionInvocation.setInput("ExpiredVolumeValue", "88");
         new ActionCallback.Default(actionInvocation, upnpService.getControlPoint()).run();
     }
+    
     public void invocationActionAsync(Service service) {
         UpnpServiceImpl upnpService = new UpnpServiceImpl();
         Action action = service.getAction(MultiMediaService.ACTION_SET_VOLUME);
+        
         ActionInvocation actionInvocation = new ActionInvocation<>(action);
         actionInvocation.setInput("ExpiredVolumeValue", "99");
+        
         upnpService.getControlPoint().execute(new ActionCallback(actionInvocation) {
             @Override
             public void success(ActionInvocation invocation) {
@@ -367,6 +389,7 @@ public class ClientThread implements Runnable, RegistryListener {
                 System.out.println(defaultMsg);
             }
         });
+        
         // Avoiding function complete immediately
         try {
             Thread.sleep(1000 * 60);
@@ -386,7 +409,7 @@ in console after `setVolume` function end.
 When you print volume value, you will see twice output in console, one is sync
 , the other is async.
 
-## Reference
+## 5. Reference
 1. [Official document of Cling core](http://4thline.org/projects/cling/core/manual/cling-core-manual.xhtml)
 
 
