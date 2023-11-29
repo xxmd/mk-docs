@@ -1,3 +1,4 @@
+# ref from https://blog.yorek.xyz/
 site_name: GMJ Blog
 theme:
   name: material
@@ -19,9 +20,16 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
-
+  - admonition
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
 nav:
   - Home: index.md
   - Android:
     - android/cling-in-java.md
+  - GFW:
+    - gfw/airport-chapter1-V2Board.md
 
